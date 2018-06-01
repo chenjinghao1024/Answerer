@@ -24,6 +24,9 @@ public class CommonUtil {
 
     private static Point origin = new Point();
 
+    /**
+     * 设置全局字体
+     */
     public static void initGlobalFont(){
         FontUIResource fontUIResource = new FontUIResource(new Font("微软雅黑",Font.PLAIN, 18));
         for (Enumeration keys = UIManager.getDefaults().keys(); keys.hasMoreElements();) {
@@ -61,6 +64,11 @@ public class CommonUtil {
         }
         return definedFont;
     }
+
+    /**
+     * 添加窗体拖动监听(系统标题隐藏 不添加监听无法拖动
+     * @param frame 所监听窗口
+     */
     public static void addMouseMotionListener(JFrame frame){
 //        AWTUtilities.setWindowOpaque(frame, false);
         frame.addMouseListener(new MouseAdapter() {

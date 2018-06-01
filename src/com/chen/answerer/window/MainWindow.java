@@ -15,42 +15,54 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 答题器主体
+ * @author MR.D
+ */
 public class MainWindow extends JFrame {
-
+    // 版本信息及作者信息
     private final static String VERSION = "0.0.2 Beta";
     private final static String AUTHOR = "Mr.D,Hong";
 
+    // 屏幕宽高
     private final int screenWidth;
     private final int screenHeight;
-    private int windowHeight;
+    // 窗口基础高度
+    private int windowHeight = 300;
 
-
+    // 问题识别结果
     private JLabel question;
+    // 日志
     private final JLabel logLabel;
+    // 版本
     private final JLabel versionLabel;
+    // 作者
     private final JLabel authorLabel;
-    private JLabel answerTitle;
 
+    // 主窗体容器
     private JPanel mainPanel;
-    private JPanel answerPanel;
 
+    //全局键盘监听
     private static KeyListener keyListener;
 
+    // 主窗体
     private static MainWindow mainWindow;
+    // http请求工具
     private static HttpClientUtil httpClientUtil;
-
+    // 数据接口url
     private final String url = "https://nsh.leanapp.cn/main/data";
 
-
     public static void main(String[] args){
+        // 设置字体渲染 : windows渲染
         System.setProperty("awt.useSystemAAFontSettings", "on");
         System.setProperty("swing.aatext", "true");
         EventQueue.invokeLater(() -> {
             try{
+
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                System.out.println("运行程序");
                 MainWindow frame = new MainWindow();
                 frame.setVisible(true);
+                // 不可修改大小
                 frame.setResizable(false);
                 new Thread(() -> keyListener = new KeyListener(mainWindow)).start();
                 httpClientUtil = new HttpClientUtil();
@@ -62,24 +74,25 @@ public class MainWindow extends JFrame {
 
 
     private MainWindow() throws HeadlessException {
-        super("答题");
+
         mainWindow = this;
         CommonUtil.initGlobalFont();
         CommonUtil.addMouseMotionListener(this);
 
+        // 设置无边框
         this.setUndecorated(true);
-
+        // 获取屏幕宽高
         Dimension screensize = Toolkit.getDefaultToolkit().getScreenSize();
         screenWidth = (int)screensize.getWidth();
         screenHeight = (int)screensize.getHeight();
-
+        // 设置默认关闭时间
         setDefaultCloseOperation (WindowConstants.EXIT_ON_CLOSE);
-        windowHeight = 300;
+        // 初始高度
         setBounds(screenWidth - 500, 0, 500, windowHeight);
         setAlwaysOnTop(true);
         setResizable(false);
         setFocusable(true);
-
+        // 主窗体
         mainPanel = new JPanel();
         mainPanel.setBackground(Color.white);
         mainPanel.setBorder(new LineBorder(new Color(157,157,157),1));
@@ -117,19 +130,19 @@ public class MainWindow extends JFrame {
         logLabel.setBorder(new LineBorder(new Color(157,157,157),2));
         logLabel.setBounds(70, 100, 360, 30);
         mainPanel.add(logLabel);
-
+        // 文字
         JLabel questionTitle = new JLabel("识别图片【~】");
         questionTitle.setFont(CommonUtil.getTitleFont(20));
         questionTitle.setForeground(new Color(157,157,157));
         questionTitle.setBounds(70, 150, 360, 30);
         mainPanel.add(questionTitle);
-
+        // 版本信息
         versionLabel = new JLabel("Version:"+VERSION,JLabel.CENTER);
         versionLabel.setFont(CommonUtil.getTitleFont(20));
         versionLabel.setForeground(new Color(255,121,121));
         versionLabel.setBounds(0, 200, 500, 50);
         mainPanel.add(versionLabel);
-
+        // 作者信息
         authorLabel = new JLabel("By:"+AUTHOR,JLabel.CENTER);
         authorLabel.setFont(CommonUtil.getTitleFont(20));
         authorLabel.setForeground(new Color(255,121,121));
@@ -137,6 +150,10 @@ public class MainWindow extends JFrame {
         mainPanel.add(authorLabel);
     }
 
+    /**
+     * 主逻辑进程
+     * @throws Exception 子方法异常
+     */
     public void getQuestion() throws Exception {
         setLog("获取图片啦!");
         String path = CommonUtil.getImageFromClipboard();
@@ -153,6 +170,9 @@ public class MainWindow extends JFrame {
         getAnswer(questionText);
     }
 
+    /**
+     * 添加识别后问题文字
+     */
     private void addQuestion() {
         if(question==null){
             question = new JLabel();
@@ -164,26 +184,38 @@ public class MainWindow extends JFrame {
 
     }
 
+    /**
+     * 设置log
+     * @param log log信息
+     */
     private void setLog(String log){
         logLabel.setText(log);
     }
 
+    /**
+     * 请求接口获取答案
+     * @param questionText 题目文本
+     */
     private void getAnswer(String questionText) {
         Map<String,String> params = new HashMap<>();
         params.put("content",questionText);
         params.put("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
         String result = httpClientUtil.doPost(url,params,"utf-8");
-
         setAnswerToWindow(JSON.parseArray(result));
     }
+
+    /**
+     * 根据返回结果 处理数据并在页面上做出对应处理
+     * @param answers 匹配到的题目对
+     */
     private void setAnswerToWindow(JSONArray answers){
         if(answers.size() == 0){
-
             setLog("查无此题!生死由命!嗯!(ー`´ー)");
             return;
         }
 //        setBounds(screenWidth - 500, 0, 500, 1000);
-
+        // 答案标题
+        JLabel answerTitle;
         answerTitle = new JLabel("题库答案");
         answerTitle.setFont(CommonUtil.getTitleFont(20));
         answerTitle.setForeground(new Color(157,157,157));
@@ -197,10 +229,18 @@ public class MainWindow extends JFrame {
         setLog("搞定啦啦啦啦啦~(◦˙▽˙◦)");
     }
 
+    /**
+     * 待完善
+     * @param answer 单题对
+     */
     private void setAnswerToWindow(JSONObject answer){
         System.out.println(answer.toString());
     }
 
+    /**
+     * 重置窗口大小 待修改
+     * @param high 待定
+     */
     private void resetWindowHigh(int high){
         setBounds(getX(), getY(), getWidth(), windowHeight+high);
         versionLabel.setBounds(versionLabel.getX(), versionLabel.getY()+high,
