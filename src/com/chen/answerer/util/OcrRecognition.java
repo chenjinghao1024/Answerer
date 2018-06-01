@@ -19,17 +19,17 @@ public class OcrRecognition {
         client.setConnectionTimeoutInMillis(2000);
         client.setSocketTimeoutInMillis(60000);
        try {
-           JSONObject res = client.basicGeneral(path, new HashMap<String, String>());
+           JSONObject res = client.basicGeneral(path, new HashMap<>());
            JSONArray jsonArray = (JSONArray) res.get("words_result");
 
-           StringBuffer result = new StringBuffer();
+           StringBuilder result = new StringBuilder();
            for (int i = 0; i < jsonArray.length(); i++) {
                JSONObject json = (JSONObject) jsonArray.get(i);
-               result.append(json.get("words")).append("<br>\n");
+               result.append(json.get("words"));
            }
            return result.toString();
        }catch (Exception e){
-           return "题目识别失败";
+           return null;
        }
     }
 }
