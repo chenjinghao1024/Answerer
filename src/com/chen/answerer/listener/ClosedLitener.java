@@ -28,13 +28,13 @@ public class ClosedLitener implements MouseListener,ActionListener {
     @Override
     public void mouseEntered(MouseEvent e) {
         JButton button = (JButton) e.getSource();
-        button.setIcon(new ImageIcon(MainWindow.class.getResource("../icon/X_close_active.png")));
+        button.setIcon(new ImageIcon(MainWindow.class.getResource("/com/chen/answerer/icon/X_close_active.png")));
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
         JButton button = (JButton) e.getSource();
-        button.setIcon(new ImageIcon(MainWindow.class.getResource("../icon/X_close_32px.png")));
+        button.setIcon(new ImageIcon(MainWindow.class.getResource("/com/chen/answerer/icon/X_close_32px.png")));
     }
 
     @Override

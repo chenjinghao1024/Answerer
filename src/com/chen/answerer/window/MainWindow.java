@@ -21,12 +21,13 @@ import java.util.Map;
  */
 public class MainWindow extends JFrame {
     // 版本信息及作者信息
-    private final static String VERSION = "0.0.2 Beta";
+    private final static String VERSION = "v0.1.0";
     private final static String AUTHOR = "Mr.D,Hong";
 
     // 屏幕宽高
     private final int screenWidth;
     private final int screenHeight;
+
     // 窗口基础高度
     private int windowHeight = 300;
 
@@ -38,6 +39,10 @@ public class MainWindow extends JFrame {
     private final JLabel versionLabel;
     // 作者
     private final JLabel authorLabel;
+    // 答案组
+    private JLabel answersLabel;
+    // 答案标题
+    private JLabel answerTitle;
 
     // 主窗体容器
     private JPanel mainPanel;
@@ -51,6 +56,7 @@ public class MainWindow extends JFrame {
     private static HttpClientUtil httpClientUtil;
     // 数据接口url
     private final String url = "https://nsh.leanapp.cn/main/data";
+
 
     public static void main(String[] args){
         // 设置字体渲染 : windows渲染
@@ -109,7 +115,7 @@ public class MainWindow extends JFrame {
 
         // 关闭按钮
         JButton closeButton = new JButton(
-                new ImageIcon(this.getClass().getResource("../icon/X_close_32px.png")));
+                new ImageIcon(this.getClass().getResource("/com/chen/answerer/icon/X_close_32px.png")));
         closeButton.setContentAreaFilled(false);
         closeButton.setBorderPainted(false);//不绘制边框
         closeButton.setBounds(500-32, 6, 32, 32);
@@ -179,7 +185,7 @@ public class MainWindow extends JFrame {
             question.setBounds(70, 180, 360, 100);
             question.setBorder(new LineBorder(new Color(157,157,157),2));
             mainPanel.add(question);
-            resetWindowHigh(100);
+            resetWindowHigh(question.getHeight());
         }
 
     }
@@ -209,45 +215,59 @@ public class MainWindow extends JFrame {
      * @param answers 匹配到的题目对
      */
     private void setAnswerToWindow(JSONArray answers){
+
+        if(answersLabel != null){
+            resetWindowHigh(0-answersLabel.getHeight());
+            mainPanel.remove(answersLabel);
+            answersLabel = null;
+        }
+
         if(answers.size() == 0){
             setLog("查无此题!生死由命!嗯!(ー`´ー)");
             return;
         }
+
 //        setBounds(screenWidth - 500, 0, 500, 1000);
         // 答案标题
-        JLabel answerTitle;
-        answerTitle = new JLabel("题库答案");
-        answerTitle.setFont(CommonUtil.getTitleFont(20));
-        answerTitle.setForeground(new Color(157,157,157));
-        answerTitle.setBounds(70, 300, 360, 50);
-        answerTitle.setBorder(new LineBorder(new Color(157,157,157),2));
-        mainPanel.add(answerTitle);
+        if (answerTitle == null){
+            answerTitle = new JLabel("题库答案");
+            answerTitle.setFont(CommonUtil.getTitleFont(20));
+            answerTitle.setForeground(new Color(157,157,157));
+            answerTitle.setBounds(70, 280, 360, 50);
+            mainPanel.add(answerTitle);
+            resetWindowHigh(answerTitle.getHeight());
+        }
 
-        answers.forEach(anwser -> setAnswerToWindow((JSONObject) anwser));
+        StringBuilder answerStr = new StringBuilder();
+        answerStr.append("<html><body style = \"border: 2px solid #9d9d9d;\">\n" );
+        for (Object answer1 : answers) {
+            JSONObject answer = (JSONObject) answer1;
+            answerStr.append("<div style=\"border: 2px dashed #cccc;padding: 10px 20px 10px 20px;width:100%;height:100px\">\n" + "<p>Q：").append(answer.getString("q")).append("</p>\n").append("<p>A：").append(answer.getString("a")).append("</p>\n").append("</div>\n");
+        }
+        answerStr.append("</body><html>");
 
 
+        answersLabel = new JLabel(answerStr.toString());
+//        answersLabel.setBackground(Color.blue);
+//        answersLabel.setOpaque(true);
+        answersLabel.setBounds(70, 330, 360, (120)*answers.size()+50);
+        mainPanel.add(answersLabel);
+        resetWindowHigh(answersLabel.getHeight());
         setLog("搞定啦啦啦啦啦~(◦˙▽˙◦)");
     }
 
-    /**
-     * 待完善
-     * @param answer 单题对
-     */
-    private void setAnswerToWindow(JSONObject answer){
-        System.out.println(answer.toString());
-    }
 
     /**
      * 重置窗口大小 待修改
-     * @param high 待定
+     * @param high 待定`
      */
     private void resetWindowHigh(int high){
-        setBounds(getX(), getY(), getWidth(), windowHeight+high);
+        setBounds(getX(), getY(), getWidth(), getHeight()+high);
+
         versionLabel.setBounds(versionLabel.getX(), versionLabel.getY()+high,
                 versionLabel.getWidth(), versionLabel.getHeight());
         authorLabel.setBounds(authorLabel.getX(), authorLabel.getY()+high,
                 authorLabel.getWidth(), authorLabel.getHeight());
-        windowHeight += high;
         mainPanel.updateUI();
     }
 }

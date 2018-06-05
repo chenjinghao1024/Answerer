@@ -45,7 +45,7 @@ public class CommonUtil {
         BufferedInputStream bis = null;
         try {
 
-            is=MainWindow.class.getResourceAsStream("../font/title_text.ttf");//Class类的一个方法,将本地的资源加载成一个输入流
+            is=MainWindow.class.getResourceAsStream("/com/chen/answerer/font/title_text.ttf");//Class类的一个方法,将本地的资源加载成一个输入流
             bis=new BufferedInputStream(is);
             definedFont=Font.createFont(Font.TRUETYPE_FONT,bis);//使用TRUETYPE类型的字体来创建新的字体
             definedFont=definedFont.deriveFont(size);//复制当前字体对象并应用新的大小来创建一个新的字体
