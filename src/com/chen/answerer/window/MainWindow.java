@@ -9,9 +9,14 @@ import com.chen.answerer.util.HttpClientUtil;
 import com.chen.answerer.util.KeyListener;
 import com.chen.answerer.util.OcrRecognition;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,24 +26,27 @@ import java.util.Map;
  */
 public class MainWindow extends JFrame {
     // 版本信息及作者信息
-    private final static String VERSION = "v0.1.0";
+    private final static String VERSION = "v0.1.1";
     private final static String AUTHOR = "Mr.D,Hong";
+
+    private final static boolean isSaveQuestion = false;
+    private final static boolean isSaveAllScreen = true;
 
     // 屏幕宽高
     private final int screenWidth;
     private final int screenHeight;
 
     // 窗口基础高度
-    private int windowHeight = 300;
+    private int windowHeight = 200;
 
     // 问题识别结果
     private JLabel question;
     // 日志
     private final JLabel logLabel;
-    // 版本
-    private final JLabel versionLabel;
-    // 作者
-    private final JLabel authorLabel;
+//    // 版本
+//    private final JLabel versionLabel;
+//    // 作者
+//    private final JLabel authorLabel;
     // 答案组
     private JLabel answersLabel;
     // 答案标题
@@ -56,7 +64,6 @@ public class MainWindow extends JFrame {
     private static HttpClientUtil httpClientUtil;
     // 数据接口url
     private final String url = "https://nsh.leanapp.cn/main/data";
-
 
     public static void main(String[] args){
         // 设置字体渲染 : windows渲染
@@ -94,7 +101,7 @@ public class MainWindow extends JFrame {
         // 设置默认关闭时间
         setDefaultCloseOperation (WindowConstants.EXIT_ON_CLOSE);
         // 初始高度
-        setBounds(screenWidth - 500, 0, 500, windowHeight);
+        setBounds((screenWidth-500)/2, (screenHeight-300)/2 , 500, windowHeight);
         setAlwaysOnTop(true);
         setResizable(false);
         setFocusable(true);
@@ -124,36 +131,36 @@ public class MainWindow extends JFrame {
         closeButton.addActionListener(closedLitener);
         mainPanel.add(closeButton);
 
-        // 标题
-        JLabel titleText = new JLabel("逆水寒科举答题工具",JLabel.CENTER);
-        titleText.setFont(CommonUtil.getTitleFont(30));
-        titleText.setForeground(new Color(255,121,121));
-        titleText.setBounds(0, 20, 500, 50);
-        mainPanel.add(titleText);
+//        // 标题
+//        JLabel titleText = new JLabel("逆水寒科举答题工具",JLabel.CENTER);
+//        titleText.setFont(CommonUtil.getTitleFont(30));
+//        titleText.setForeground(new Color(255,121,121));
+//        titleText.setBounds(0, 20, 500, 50);
+//        mainPanel.add(titleText);
 
         // 日志窗口
         logLabel = new JLabel("[]~(￣▽￣)~*");
         logLabel.setBorder(new LineBorder(new Color(157,157,157),2));
-        logLabel.setBounds(70, 100, 360, 30);
+        logLabel.setBounds(70, 50, 360, 30);
         mainPanel.add(logLabel);
         // 文字
         JLabel questionTitle = new JLabel("识别图片【~】");
         questionTitle.setFont(CommonUtil.getTitleFont(20));
         questionTitle.setForeground(new Color(157,157,157));
-        questionTitle.setBounds(70, 150, 360, 30);
+        questionTitle.setBounds(70, 100, 360, 30);
         mainPanel.add(questionTitle);
-        // 版本信息
-        versionLabel = new JLabel("Version:"+VERSION,JLabel.CENTER);
-        versionLabel.setFont(CommonUtil.getTitleFont(20));
-        versionLabel.setForeground(new Color(255,121,121));
-        versionLabel.setBounds(0, 200, 500, 50);
-        mainPanel.add(versionLabel);
-        // 作者信息
-        authorLabel = new JLabel("By:"+AUTHOR,JLabel.CENTER);
-        authorLabel.setFont(CommonUtil.getTitleFont(20));
-        authorLabel.setForeground(new Color(255,121,121));
-        authorLabel.setBounds(0, 230, 500, 50);
-        mainPanel.add(authorLabel);
+//        // 版本信息
+//        versionLabel = new JLabel("Version:"+VERSION,JLabel.CENTER);
+//        versionLabel.setFont(CommonUtil.getTitleFont(20));
+//        versionLabel.setForeground(new Color(255,121,121));
+//        versionLabel.setBounds(0, 200, 500, 50);
+//        mainPanel.add(versionLabel);
+//        // 作者信息
+//        authorLabel = new JLabel("By:"+AUTHOR,JLabel.CENTER);
+//        authorLabel.setFont(CommonUtil.getTitleFont(20));
+//        authorLabel.setForeground(new Color(255,121,121));
+//        authorLabel.setBounds(0, 230, 500, 50);
+//        mainPanel.add(authorLabel);
     }
 
     /**
@@ -161,11 +168,20 @@ public class MainWindow extends JFrame {
      * @throws Exception 子方法异常
      */
     public void getQuestion() throws Exception {
-        setLog("获取图片啦!");
-        String path = CommonUtil.getImageFromClipboard();
-        setLog("识别图片啦!");
-        String questionText=OcrRecognition.imageToText(path);
-        setLog("识别完啦!");
+        String questionText;
+        if (isSaveQuestion){
+            setLog("获取图片....");
+            String path = CommonUtil.getImageFromClipboard();
+            setLog("识别图片....");
+            questionText=OcrRecognition.imageToText(path);
+        }else {
+            setLog("获取图片....");
+            byte[] image = CommonUtil.getImageBytesFromClipboard();
+            setLog("识别图片....");
+            questionText=OcrRecognition.imageToText(image);
+        }
+
+        setLog("识别完成!");
         if(questionText == null){
             setLog("截图!截图!截图!说三遍!(◦`~´◦)");
             return;
@@ -182,7 +198,7 @@ public class MainWindow extends JFrame {
     private void addQuestion() {
         if(question==null){
             question = new JLabel();
-            question.setBounds(70, 180, 360, 100);
+            question.setBounds(70, 130, 360, 100);
             question.setBorder(new LineBorder(new Color(157,157,157),2));
             mainPanel.add(question);
             resetWindowHigh(question.getHeight());
@@ -206,8 +222,9 @@ public class MainWindow extends JFrame {
         Map<String,String> params = new HashMap<>();
         params.put("content",questionText);
         params.put("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
-        String result = httpClientUtil.doPost(url,params,"utf-8");
-        setAnswerToWindow(JSON.parseArray(result));
+        String resultStr = httpClientUtil.doPost(url,params,"utf-8");
+        JSONObject result = JSON.parseObject(resultStr);
+        setAnswerToWindow(result.getJSONArray("results"));
     }
 
     /**
@@ -224,6 +241,7 @@ public class MainWindow extends JFrame {
 
         if(answers.size() == 0){
             setLog("查无此题!生死由命!嗯!(ー`´ー)");
+            saveScreen();
             return;
         }
 
@@ -233,16 +251,26 @@ public class MainWindow extends JFrame {
             answerTitle = new JLabel("题库答案");
             answerTitle.setFont(CommonUtil.getTitleFont(20));
             answerTitle.setForeground(new Color(157,157,157));
-            answerTitle.setBounds(70, 280, 360, 50);
+            answerTitle.setBounds(70, 230, 360, 50);
             mainPanel.add(answerTitle);
             resetWindowHigh(answerTitle.getHeight());
         }
 
         StringBuilder answerStr = new StringBuilder();
-        answerStr.append("<html><body style = \"border: 2px solid #9d9d9d;\">\n" );
+        answerStr.append("<html><body >\n" );
         for (Object answer1 : answers) {
             JSONObject answer = (JSONObject) answer1;
-            answerStr.append("<div style=\"border: 2px dashed #cccc;padding: 10px 20px 10px 20px;width:100%;height:100px\">\n" + "<p>Q：").append(answer.getString("q")).append("</p>\n").append("<p>A：").append(answer.getString("a")).append("</p>\n").append("</div>\n");
+            answerStr.append("<div style=\"border: 2px dashed #9d9d9d;" +
+                    "padding: 10px 20px 10px 20px;" +
+                    "height:100px;" +
+                    "line-height: 1.5;" +
+                    "vertical-align: middle;\">\n" + "<p>Q：")
+                    .append(answer.getString("q"))
+                    .append("</p>\n")
+                    .append("<p>A：")
+                    .append(answer.getString("a"))
+                    .append("</p>\n")
+                    .append("</div>\n");
         }
         answerStr.append("</body><html>");
 
@@ -250,12 +278,32 @@ public class MainWindow extends JFrame {
         answersLabel = new JLabel(answerStr.toString());
 //        answersLabel.setBackground(Color.blue);
 //        answersLabel.setOpaque(true);
-        answersLabel.setBounds(70, 330, 360, (120)*answers.size()+50);
+        answersLabel.setBounds(70, 280, 360, (132)*answers.size());
         mainPanel.add(answersLabel);
         resetWindowHigh(answersLabel.getHeight());
         setLog("搞定啦啦啦啦啦~(◦˙▽˙◦)");
     }
 
+    private void saveScreen() {
+        if(!isSaveAllScreen){
+            return;
+        }
+        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        BufferedImage screenshot;
+        File file;
+        try {
+            screenshot = (new Robot()).createScreenCapture(new Rectangle(0,
+                    0,(int)dimension.getWidth(),(int)dimension.getHeight()));
+            File path = new File("d:/image");
+            if(!path.exists()){
+                boolean mkdirs = path.mkdirs();
+            }
+            file = new File(path, new Date().getTime()+".jpg");
+            ImageIO.write(screenshot,"jpg", file);
+        } catch (AWTException | IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 重置窗口大小 待修改
@@ -263,11 +311,11 @@ public class MainWindow extends JFrame {
      */
     private void resetWindowHigh(int high){
         setBounds(getX(), getY(), getWidth(), getHeight()+high);
-
-        versionLabel.setBounds(versionLabel.getX(), versionLabel.getY()+high,
-                versionLabel.getWidth(), versionLabel.getHeight());
-        authorLabel.setBounds(authorLabel.getX(), authorLabel.getY()+high,
-                authorLabel.getWidth(), authorLabel.getHeight());
-        mainPanel.updateUI();
+//
+//        versionLabel.setBounds(versionLabel.getX(), versionLabel.getY()+high,
+//                versionLabel.getWidth(), versionLabel.getHeight());
+//        authorLabel.setBounds(authorLabel.getX(), authorLabel.getY()+high,
+//                authorLabel.getWidth(), authorLabel.getHeight());
+//        mainPanel.updateUI();
     }
 }

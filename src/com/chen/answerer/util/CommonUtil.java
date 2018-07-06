@@ -13,10 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Date;
 import java.util.Enumeration;
 
@@ -86,8 +83,8 @@ public class CommonUtil {
     }
 
     public static String getImageFromClipboard() throws Exception{
-        Clipboard sysc = Toolkit.getDefaultToolkit().getSystemClipboard();
-        Transferable cc = sysc.getContents(null);
+        Clipboard cli = Toolkit.getDefaultToolkit().getSystemClipboard();
+        Transferable cc = cli.getContents(null);
         if (cc == null){
             return null;
         }else if(cc.isDataFlavorSupported(DataFlavor.imageFlavor)){
@@ -110,5 +107,27 @@ public class CommonUtil {
         }
         return null;
     }
+
+    public static byte[] getImageBytesFromClipboard() throws Exception{
+        Clipboard cli = Toolkit.getDefaultToolkit().getSystemClipboard();
+        Transferable cc = cli.getContents(null);
+        if (cc == null){
+            return null;
+        }else if(cc.isDataFlavorSupported(DataFlavor.imageFlavor)){
+            Image image = (Image) cc.getTransferData(DataFlavor.imageFlavor);
+            BufferedImage bImage= new BufferedImage(image.getWidth(null),
+                    image.getHeight(null),BufferedImage.TYPE_INT_ARGB);
+            Graphics bg= bImage.getGraphics();
+            bg.drawImage(image,0,0,null);
+            bg.dispose();
+            ByteArrayOutputStream out= new ByteArrayOutputStream();
+
+            ImageIO.write(bImage,"jpg",out);
+
+            return out.toByteArray();
+        }
+        return null;
+    }
+
 
 }

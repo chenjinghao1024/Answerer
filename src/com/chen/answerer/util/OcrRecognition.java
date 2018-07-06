@@ -13,23 +13,37 @@ public class OcrRecognition {
     private static final String SECRET_KEY = "QWXHwG3MVplsYpLg5xX64GyHBXUYI9Ba";
     private static AipOcr client= new AipOcr(APP_ID, API_KEY, SECRET_KEY);
 
-
-
     public static String imageToText(String path){
         client.setConnectionTimeoutInMillis(2000);
         client.setSocketTimeoutInMillis(60000);
        try {
            JSONObject res = client.basicGeneral(path, new HashMap<>());
-           JSONArray jsonArray = (JSONArray) res.get("words_result");
-
-           StringBuilder result = new StringBuilder();
-           for (int i = 0; i < jsonArray.length(); i++) {
-               JSONObject json = (JSONObject) jsonArray.get(i);
-               result.append(json.get("words"));
-           }
-           return result.toString();
+           return resultToString(res);
        }catch (Exception e){
            return null;
        }
     }
+
+    public static String imageToText(byte[] image){
+        client.setConnectionTimeoutInMillis(2000);
+        client.setSocketTimeoutInMillis(60000);
+        try {
+            JSONObject res = client.basicGeneral(image, new HashMap<>());
+            return resultToString(res);
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    private static String resultToString(JSONObject res){
+        JSONArray jsonArray = (JSONArray) res.get("words_result");
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject json = (JSONObject) jsonArray.get(i);
+            result.append(json.get("words"));
+        }
+        return result.toString();
+    }
+
 }
